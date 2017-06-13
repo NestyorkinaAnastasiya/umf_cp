@@ -20,6 +20,9 @@
     <Text Include="Intervals.txt" />
     <Text Include="number_of_test.txt" />
     <Text Include="result.txt" />
+    <Text Include="time.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="basis.cpp">

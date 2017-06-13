@@ -125,7 +125,7 @@ namespace slae
 	void SLAE::CalculateLocalF(int elementNumber)
 	{
 		Element element = grid.elements[elementNumber];
-		double ksi, etta, x_, y_, ui,
+		double ksi, etta, x_, y_,
 			x1 = grid.nodes[element.nodes[0]].x, x3 = grid.nodes[element.nodes[1]].x,
 			y1 = grid.nodes[element.nodes[0]].y, y3 = grid.nodes[element.nodes[2]].y,
 			hx = x3 - x1, hy = y3 - y1,
@@ -140,9 +140,9 @@ namespace slae
 					ksi = 0.5 + 0.5 * gaussPoints[0][k]; etta = 0.5 + 0.5 * gaussPoints[1][k];
 					x_ = x1 + ksi*hx; y_ = y1 + etta*hy;
 
-					locF[i] += tests.Fi(ui, x_, y_, t) * gaussWeights[k] * phi[i](ksi, etta);
+					locF[i] += tests.Fi(x_, y_, t) * gaussWeights[k] * phi[i](ksi, etta);
 				}
-			locF[i] *= jacobian ;
+			locF[i] *= jacobian;
 		}
 	}
 
@@ -539,20 +539,6 @@ namespace slae
 		dis = Rel_Discrepancy();
 	}
 #pragma endregion
-	double SLAE::StopIteration()
-	{
-		vector <double> b(n), z(n);
-		
-		//генерируем СЛАУ с текущим решением
-		GenerateSLAE();
-		//умножаем матрицу на текущее решение
-		A.MultiplyAx(u, z);
-		//и находим абсолютную невязку
-		for (int i = 0; i < n; i++)
-			b[i] = z[i] - F[i];
-
-		return Norm(b) / Norm(F);
-	}
 
 	void  SLAE::CalculateTimeVector(double time, vector<double> &result)
 	{
@@ -584,10 +570,12 @@ namespace slae
 	{
 		FILE *fo;
 		fopen_s(&fo, "result.txt", "w");
-		int k;
 		CalculateTimeVector(grid.time[0], u_t2);
 		CalculateTimeVector(grid.time[1], u_t1);
-		
+		CalculateTimeVector(grid.time[2], u);
+		for (auto i:grid.time)
+			fprintf(fo, "%.14lf\t", i);
+		fprintf(fo, "\n\n");
 		//цикл по времени
 		for (int i = 2; i < grid.time.size(); i++)
 		{
@@ -601,19 +589,18 @@ namespace slae
 			GenerateSLAE();
 			LULOS();
 
-			//сохраняем решение на предыдущем временном слое
+			//сохраняем решение на предыдущих временных слоях
 			u_t2 = u_t1;
 			u_t1 = u;
+
 			for (int i = 0; i < n; i++)
 				fprintf(fo, "%.14lf\n", u[i]);
-			fprintf(fo, "%f\t", t);
-			fprintf(fo, "%d\t", k);
+			fprintf(fo, "%.14lf\t", t);
 			fprintf(fo, "\n\n");
 
 			printf("Vector:");
 			for (int i = 0; i < n; i++)
 				printf("\t\t%.14lf\n", u[i]);
-			printf("%d\t", k);
 			printf("\n\n");
 		}
 		fclose(fo);

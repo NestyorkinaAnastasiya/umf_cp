@@ -127,9 +127,9 @@ namespace grid
 		//шаг
 		double h;
 		FILE *fo;
-
-		double t1, tn, tIntervals, tCoefficient;
-		fopen_s(&fo, "Time.txt", "r");
+		int tIntervals;
+		double t1, tn, tCoefficient;
+		fopen_s(&fo, "time.txt", "r");
 
 		fscanf_s(fo, "%lf", &t1);
 		fscanf_s(fo, "%lf", &tn);
